@@ -264,7 +264,6 @@ function Mesh(props: MeshProps) {
   return (<mesh>
         <bufferGeometry attach="geometry">
         <bufferAttribute
-            attachObject={["attributes", "position"]} 
             attach="attributes-position"
             count={positions.length / 3} array={positions} itemSize={3} />
         </bufferGeometry>
