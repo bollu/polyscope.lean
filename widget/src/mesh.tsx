@@ -256,13 +256,30 @@ function Mesh(props: MeshProps) {
   // const vertices = [2, 0, 0, 0, 2, 0, 0, 0, 2];
   // const indices = [0, 1, 2];
 
-  const count = 500;
-  const positions = new Float32Array(count * 3);
-  for (let i = 0; i < count * 3; i++) {
-    positions[i] = (Math.random() - 0.5) * 10;
+  const nverts = 500;
+  const positions = new Float32Array(nverts * 3);
+  for (let i = 0; i < nverts; i++) {
+    if (i % 3 == 2) { positions[i] = 0; }
+    else {
+      positions[i] = (Math.random() - 0.5) * 10;
+    }
+  }
+
+  const ntris = 300;
+  const index = new Uint16Array(ntris*3);
+  for(let i = 0; i < ntris; i++) {
+    // index[i] = Math.floor(Math.random() * (nverts - 1))
+    index[i] = Math.floor(Math.random() * (nverts - 1));
+    index[i+1] = Math.floor(Math.random() * (nverts - 1));
+    index[i+2] = Math.floor(Math.random() * (nverts - 1));
   }
   return (<mesh>
         <bufferGeometry attach="geometry">
+        <bufferAttribute
+          attach="index"
+          count={index.length}
+          array={index}
+          itemSize={1} />
         <bufferAttribute
             attach="attributes-position"
             count={positions.length / 3} array={positions} itemSize={3} />
