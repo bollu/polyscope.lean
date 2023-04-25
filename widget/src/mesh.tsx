@@ -222,9 +222,17 @@ function Mesh(props: MeshProps) {
       array={props.faces} />
   </bufferGeometry>
   */
+
+/*
+<bufferGeometry>
+<bufferAttribute array={indices} attach="index" count={indices.length} itemSize={1} />
+<bufferAttribute attach="attributes-position" count={3} array={[1,0,0,0,1,0,0,0,1]} itemSize={3} />
+<meshBasicMaterial attach="material" color="blue" />
+</bufferGeometry>
+*/
   return (<mesh ref={me}> 
-        <boxGeometry args={[2, 2, 2]}></boxGeometry>
-        <meshStandardMaterial />
+        <boxGeometry args={[2, 2, 2]} />
+        <meshStandardMaterial color="#ff0000"/>
       </mesh>);
 }
 

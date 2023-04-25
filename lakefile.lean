@@ -51,6 +51,7 @@ def widgetTsxTarget (pkg : Package) (tsxName : String) (deps : Array (BuildJob F
       cwd := some widgetDir
     }
 
+/-
 def installDeps (isDev : Bool): LogIO Unit := do
     proc {
       cmd := npmCmd
@@ -61,6 +62,7 @@ def installDeps (isDev : Bool): LogIO Unit := do
           #["install"]
       cwd := some widgetDir
     }
+-/
 
 def widgetJsAllTarget (pkg : Package) [Fact (pkg.name = _package.name)] (isDev : Bool) :
     IndexBuildM (BuildJob (Array FilePath)) := do
