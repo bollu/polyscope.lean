@@ -195,34 +195,54 @@ function Meshlet(props: MeshletProps) {
 }*/
 
 interface MeshProps {
-  time: number;
-  seq: genstr[]
-  vertices: float[]; // positions of vertices.
+  vertices: number[]; // positions of vertices.
   faces: number[]; // triangle faces
 }
 
 function Mesh(props: MeshProps) {
-  return <group> </group>
+  const me = React.useRef<THREE.Mesh | null>(null)
+
+  React.useEffect(() => { // what is 'useEffect'?
+    // if (me.current) {
+    //   me.current.setRotationFromMatrix(m)
+    //   me.current.position.setFromMatrixPosition(m)
+    // }
+  }, [props.vertices, props.faces])
+
+  // https://github.com/pmndrs/react-three-fiber/blob/29a274da73ab01d29ed74bf82768462b04889c50/docs/tutorials/v8-migration-guide.mdx?plain=1#L395-L406
   /*
-  return <group>
-    {cubelets.map(cubelet =>
-      <Meshlet key={cubelet} cid={cubelet} time={props.time} seq={props.seq} />)}
-  </group>
+  <bufferGeometry>
+    <bufferAttribute 
+      attach="attributes-position"
+      count={props.vertices.length / 3}
+      array={props.vertices} itemSize={3} />
+    <bufferAttribute
+      attach="attributes-faces"
+      count={props.faces.length}
+      array={props.faces} />
+  </bufferGeometry>
   */
+  return (<mesh ref={me}> 
+        <boxGeometry args={[2, 2, 2]}></boxGeometry>
+        <meshStandardMaterial />
+      </mesh>);
 }
 
 // use bufferGeometry.
+// export default function (props: MeshProps) {
 export default function (props: any) {
-  const seq = props.seq ?? []
   const [t, setT] = React.useState(100)
   return <div style={{ height: 300 }}>
     <input type="range" min="0" max="100" value={t} onChange={e => setT(e.target.value as any)} />
-    <div>Sequence: {JSON.stringify(seq)}</div>
-    <Canvas >
+    <div>Props: {JSON.stringify(props)}</div>
+    <div>Vertices: '{JSON.stringify(props.vertices)}' </div>
+    <div>Faces: '{JSON.stringify(props.faces)}' </div>
+    <div>t: '{JSON.stringify(t)}' </div>
+    <Canvas>
       <pointLight position={[150, 150, 150]} intensity={0.55} />
       <ambientLight color={0xffffff} />
       <group rotation-x={Math.PI * 0.25} rotation-y={Math.PI * 0.25}>
-        <Mesh seq={seq} time={t / 100} />
+         <Mesh vertices={props.vertices} faces={props.faces} />
       </group>
       <OrbitControls />
     </Canvas>

@@ -103,27 +103,27 @@ def eg := #["L", "L", "D⁻¹", "U⁻¹", "L", "D", "D", "L", "U⁻¹", "R", "D"
 
 #html <Rubiks seq={eg} />
 
-abbrev Vec3 : Type := Float × Float × Float
+abbrev Vec3 : Type := Array Float
 abbrev Vertices : Type := Array Vec3
 abbrev Faces : Type := Array Nat
 
 
 structure MeshProps where
-  vs : Vertices
-  fs : Faces
+  vertices : Array Float
+  faces : Faces
+deriving Server.RpcEncodable
 
 @[widget_module]
 def Mesh : Component MeshProps where
   javascript := include_str "build" / "js" / "mesh.js"
 
 
-def vs : Vertices := #[(0, 0, 0), (1, 0, 0), (0, 0, 1)]
-def fs : Faces := #[0, 1, 2]
+-- def vertices : Vertices := #[#[0, 0, 0], #[1, 0, 0], #[0, 0, 1]]
+def vertices : Array Float := #[0, 0, 0, 1, 0, 0, 0, 0, 1]
+def faces : Faces := #[0, 1, 2]
 
-#html <Mesh vs={vs} fs={fs} />
-
-def eg := #["L", "L", "D⁻¹", "U⁻¹", "L", "D", "D", "L", "U⁻¹", "R", "D", "F", "F", "D"]
-
+#check Server.RpcEncodable
+#html <Mesh vertices={vertices} faces={faces} />
 
 
 def main : IO Unit :=
