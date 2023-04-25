@@ -229,15 +229,52 @@ function Mesh(props: MeshProps) {
 <bufferAttribute attach="attributes-position" count={3} array={[1,0,0,0,1,0,0,0,1]} itemSize={3} />
 <meshBasicMaterial attach="material" color="blue" />
 </bufferGeometry>
+
+
+
+<bufferGeometry>
+<bufferAttribute array={[0, 1, 2]} attach="index" count={3} itemSize={1} />
+<bufferAttribute attach="attributes-position" count={3} array={[0, 0, 0, 2, 0, 0, 0, 2, 0, 2, 2, 0, 0, 0, 2]} itemSize={3} />
+<bufferAttribute attach="attributes-normal" count={3} array={[0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, ]} itemSize={3} />
+</bufferGeometry>
 */
-  return (<mesh ref={me}> 
-        <boxGeometry args={[2, 2, 2]} />
-        <meshStandardMaterial color="#ff0000"/>
+
+/*
+<bufferGeometry>
+<bufferAttribute array={[0, 1, 3, 1, 2, 3, 0, 1, 4, 1, 2, 4, 2, 3, 4, 3, 0, 4]} attach="index" count={3} itemSize={1} />
+<bufferAttribute attach="attributes-position" count={5} array={[-2, 0, 0, 2, 0, 0, 2, 2.25, 0, -2, 2, 0, 0, 0, -5]} itemSize={3} />
+</bufferGeometry>
+*/
+
+/*
+    <bufferGeometry>
+    <bufferAttribute attach="attributes-position" count={3} array={[-5, -5, 5, 5, -5, 5, 5, 5, 5]} itemSize={3} />
+    </bufferGeometry>
+
+    <boxGeometry args={[5, 5, 5]}></boxGeometry>
+*/
+  // const vertices = [2, 0, 0, 0, 2, 0, 0, 0, 2];
+  // const indices = [0, 1, 2];
+
+  const count = 500;
+  const positions = new Float32Array(count * 3);
+  for (let i = 0; i < count * 3; i++) {
+    positions[i] = (Math.random() - 0.5) * 10;
+  }
+  return (<mesh>
+        <bufferGeometry attach="geometry">
+        <bufferAttribute
+            attachObject={["attributes", "position"]} 
+            attach="attributes-position"
+            count={positions.length / 3} array={positions} itemSize={3} />
+        </bufferGeometry>
+        <meshBasicMaterial attach="material" color={"#9c88ff"}/>
       </mesh>);
 }
 
 // use bufferGeometry.
 // export default function (props: MeshProps) {
+// <OrbitControls />
 export default function (props: any) {
   const [t, setT] = React.useState(100)
   return <div style={{ height: 300 }}>
@@ -247,12 +284,8 @@ export default function (props: any) {
     <div>Faces: '{JSON.stringify(props.faces)}' </div>
     <div>t: '{JSON.stringify(t)}' </div>
     <Canvas>
-      <pointLight position={[150, 150, 150]} intensity={0.55} />
-      <ambientLight color={0xffffff} />
-      <group rotation-x={Math.PI * 0.25} rotation-y={Math.PI * 0.25}>
-         <Mesh vertices={props.vertices} faces={props.faces} />
-      </group>
-      <OrbitControls />
+      <Mesh vertices={props.vertices} faces={props.faces} />
+      <OrbitControls/>
     </Canvas>
   </div>
 }
