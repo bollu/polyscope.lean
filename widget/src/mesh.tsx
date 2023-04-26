@@ -201,13 +201,21 @@ interface MeshProps {
 
 function Mesh(props: MeshProps) {
   const me = React.useRef<THREE.Mesh | null>(null)
+  const geom = React.useRef<THREE.BufferGeometry | null>(null)
 
   React.useEffect(() => { // what is 'useEffect'?
-    // if (me.current) {
+    if (me.current) {
     //   me.current.setRotationFromMatrix(m)
     //   me.current.position.setFromMatrixPosition(m)
-    // }
+    }
+
+    if (geom.current) {
+      // TODO: does this happen only once?
+      console.log("foo"); // does it care about console log?
+      geom.current.computeVertexNormals();
+    }
   }, [props.vertices, props.faces])
+
 
   // https://github.com/pmndrs/react-three-fiber/blob/29a274da73ab01d29ed74bf82768462b04889c50/docs/tutorials/v8-migration-guide.mdx?plain=1#L395-L406
   /*
@@ -273,6 +281,7 @@ function Mesh(props: MeshProps) {
     index[i] = Math.floor(Math.random() * (nverts - 1));
     index[i+1] = Math.floor(Math.random() * (nverts - 1));
     index[i+2] = Math.floor(Math.random() * (nverts - 1));
+    <meshStandardMaterial attach="material" color={"ff0000"}/>
   }
   */
   const vertices = new Float32Array(props.vertices.length);
@@ -286,8 +295,8 @@ function Mesh(props: MeshProps) {
     faces[i] = props.faces[i];
   }
 
-  return (<mesh>
-        <bufferGeometry attach="geometry">
+  return (<mesh ref={me}>
+        <bufferGeometry attach="geometry" ref={geom}>
         <bufferAttribute
           attach="index"
           count={faces.length}
@@ -297,7 +306,7 @@ function Mesh(props: MeshProps) {
             attach="attributes-position"
             count={vertices.length / 3} array={vertices} itemSize={3} />
         </bufferGeometry>
-        <meshBasicMaterial attach="material" color={"#9c88ff"}/>
+        <meshNormalMaterial attach="material" />
       </mesh>);
 }
 
@@ -313,6 +322,8 @@ export default function (props: any) {
     <div>Faces: '{JSON.stringify(props.faces)}' </div>
     <div>t: '{JSON.stringify(t)}' </div>
     <Canvas>
+      <pointLight position={[150, 150, 150]} intensity={0.55} />
+      <ambientLight color={0xffffff} />
       <Mesh vertices={props.vertices} faces={props.faces} />
       <OrbitControls/>
     </Canvas>
