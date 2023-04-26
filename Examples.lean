@@ -124,7 +124,7 @@ def egRandVertices : Array Float :=
 def egRandFaces : Array Nat :=
   (randTriFaces mkStdGen (nvertices := 500) (nfaces := 500)).fst
 
-/-- A random mesh. -/
+/- A random mesh. -/
 #html <Mesh vertices={egRandVertices} faces={egRandFaces} />
 
 /-- The stanford bunny, loaded from a file. -/
