@@ -1,6 +1,7 @@
 -- Widgets for rendering meshes and shaders.
 import Mesh
 import ProofWidgets.Component.HtmlDisplay
+import Lean
 open Lean ProofWidgets
 open scoped ProofWidgets.Jsx
 
@@ -165,15 +166,63 @@ unsafe def unsafePerformIO [Inhabited α] (io: IO α): α :=
 @[implemented_by unsafePerformIO]
 def performIO [Inhabited α] (io: IO α): α := Inhabited.default
 
-def loadMeshFromFile (filepath : FilePath) : IO MeshProps := do
-  return {vertices := #[], faces := #[]}
 
-def sphere : MeshProps := performIO <| loadMeshFromFile "./resources/sphere.obj"
+def loadMeshFromOffData [Monad m] [MonadExceptOf String m] (lines : Array String) : m MeshProps := do
+  let mut verts : Array Float := #[]
+  let mut faces : Array Nat := #[]
+  let mut i := 0
+  if lines[i]!.trim != "OFF"
+  then throw s!"expected 'OFF' on line {i+1}. but found '{lines[i]!}' which is not .OFF"
+  i := i + 1
+
+  let [n_vertices, n_faces, _n_edges] := lines[i]!.trim.splitOn " "
+    | throw s!"expected number of vertices, faces, edges information on line {i+1}, but found '{lines[i]!}'"
+  i := i + 1
+
+  let .some n_vertices := n_vertices.toNat?
+    | throw s! "unable to parse num vertices {n_vertices}"
+
+  let .some n_faces := n_faces.toNat?
+    | throw s! "unable to parse num faces {n_faces}"
+
+  for _ in List.range n_vertices do
+    let coords_raw := lines[i]!.trim.splitOn " "
+    let mut v : Array Float := #[]
+    for coord in coords_raw do
+      let .ok coord := Lean.Json.Parser.num |>.run coord
+        | throw s!"unable to parse vertex coordinate {coord} on line {i+1}"
+        v := v.push coord.toFloat
+    verts := verts.append v
+    i := i + 1
+
+  for _ in List.range n_faces do
+    let face_indexes_raw := lines[i]!.trim.splitOn " "
+    let mut f : Array Nat := #[]
+    for ix in face_indexes_raw.drop 1 do
+      let .some ix := ix.toNat?
+        | throw s!"unable to parse face index {ix} on line {i+1}"
+        f := f.push ix
+    faces := faces.append f
+    i := i + 1
+
+  return {vertices := verts, faces := faces}
+
+open System in
+def loadMeshFromOffFile (p : System.FilePath) : IO MeshProps := do
+  let out : Except String MeshProps := loadMeshFromOffData (← IO.FS.lines p)
+  match out with
+  | .ok out => return out
+  | .error err => throw <| .userError err
+
+
+def sphere : MeshProps := performIO <| loadMeshFromOffFile "./data/sphere_s3.off"
 #html <Mesh vertices={sphere.vertices} faces={sphere.faces} />
 
 
-def bunny : MeshProps := performIO <| loadMeshFromFile "./resources/bunny.obj"
+def bunny : MeshProps := performIO <| loadMeshFromOffFile "./data/bunny.off"
 #html <Mesh vertices={bunny.vertices} faces={bunny.faces} />
 
-def main : IO Unit :=
+def main : IO Unit := do
+  let sphere ← loadMeshFromOffFile "./data/sphere_s3.off"
+  let bunny ← loadMeshFromOffFile "./data/bunny.off"
   IO.println s!"Hello, {hello}!"

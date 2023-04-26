@@ -37,10 +37,11 @@ def widgetTsxTarget (pkg : Package) (tsxName : String) (deps : Array (BuildJob F
   let deps := deps ++ #[
     ← inputFile <| widgetDir / "src" / s!"{tsxName}.tsx",
     ← inputFile <| widgetDir / "rollup.config.js",
-    ← inputFile <| widgetDir / "tsconfig.json",
-    ← fetch (pkg.target ``widgetPackageLock)
+    ← inputFile <| widgetDir / "tsconfig.json"
+    -- , ← fetch (pkg.target ``widgetPackageLock)
   ]
   buildFileAfterDepArray jsFile deps fun _srcFile => do
+    IO.println s!"building {jsFile}..."
     proc {
       cmd := npmCmd
       args :=
@@ -50,19 +51,6 @@ def widgetTsxTarget (pkg : Package) (tsxName : String) (deps : Array (BuildJob F
           #["run", "build", "--", "--tsxName", tsxName]
       cwd := some widgetDir
     }
-
-/-
-def installDeps (isDev : Bool): LogIO Unit := do
-    proc {
-      cmd := npmCmd
-      args :=
-        if isDev then
-          #["install"]
-        else
-          #["install"]
-      cwd := some widgetDir
-    }
--/
 
 def widgetJsAllTarget (pkg : Package) [Fact (pkg.name = _package.name)] (isDev : Bool) :
     IndexBuildM (BuildJob (Array FilePath)) := do
