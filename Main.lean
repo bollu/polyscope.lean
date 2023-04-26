@@ -118,11 +118,43 @@ def Mesh : Component MeshProps where
   javascript := include_str "build" / "js" / "mesh.js"
 
 
--- def vertices : Vertices := #[#[0, 0, 0], #[1, 0, 0], #[0, 0, 1]]
-def vertices : Array Float := #[0, 0, 0, 1, 0, 0, 0, 0, 1]
-def faces : Faces := #[0, 1, 2]
 
-#check Server.RpcEncodable
+def randFloat01 [G : RandomGen γ] (gen : γ) : Float × γ := Id.run do do
+  let (val, gen) := G.next gen
+  let (lo, hi) := G.range gen
+  return ((Float.ofNat <| val - lo) / (Float.ofNat <| hi - lo), gen)
+
+-- def vertices : Vertices := #[#[0, 0, 0], #[1, 0, 0], #[0, 0, 1]]
+def nvertices : Nat:= 500
+def nfaces : Nat:= 100
+
+def verticesGen [RandomGen γ] (gen : γ): (Array Float) × γ := Id.run do
+  let mut gen := gen
+  let mut out : Array Float := #[]
+  for _ in List.range nvertices do
+    let (val, gen') := randFloat01 gen
+    gen := gen'
+    out := out.push <| (val - 0.5) * 10
+  return (out, gen)
+
+def vertices : Array Float := (verticesGen mkStdGen).fst
+
+
+
+def facesGen [RandomGen γ] (gen : γ) : (Array Nat) × γ := Id.run do
+  let mut out : Array Nat := #[]
+  let mut gen := gen
+  for _ in List.range nfaces do
+    let (v1, gen') := randNat gen 0 (nvertices-1); gen := gen'
+    let (v2, gen') := randNat gen 0 (nvertices-1); gen := gen'
+    let (v3, gen') := randNat gen 0 (nvertices-1); gen := gen'
+    out := out.push v1
+    out := out.push v2
+    out := out.push v3
+  return (out, gen)
+
+def faces : Array Nat := (facesGen mkStdGen).fst
+
 #html <Mesh vertices={vertices} faces={faces} />
 
 

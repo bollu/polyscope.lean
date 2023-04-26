@@ -212,7 +212,7 @@ function Mesh(props: MeshProps) {
   // https://github.com/pmndrs/react-three-fiber/blob/29a274da73ab01d29ed74bf82768462b04889c50/docs/tutorials/v8-migration-guide.mdx?plain=1#L395-L406
   /*
   <bufferGeometry>
-    <bufferAttribute 
+    <bufferAttribute
       attach="attributes-position"
       count={props.vertices.length / 3}
       array={props.vertices} itemSize={3} />
@@ -256,7 +256,8 @@ function Mesh(props: MeshProps) {
   // const vertices = [2, 0, 0, 0, 2, 0, 0, 0, 2];
   // const indices = [0, 1, 2];
 
-  const nverts = 500;
+  /*
+   const nverts = 500;
   const positions = new Float32Array(nverts * 3);
   for (let i = 0; i < nverts; i++) {
     if (i % 3 == 2) { positions[i] = 0; }
@@ -273,16 +274,27 @@ function Mesh(props: MeshProps) {
     index[i+1] = Math.floor(Math.random() * (nverts - 1));
     index[i+2] = Math.floor(Math.random() * (nverts - 1));
   }
+  */
+  const vertices = new Float32Array(props.vertices.length);
+  for (let i = 0; i < props.vertices.length; i++) {
+    vertices[i] = props.vertices[i];
+  }
+
+  const faces = new Uint16Array(props.faces.length);
+  for (let i = 0; i < props.faces.length; i++) {
+    faces[i] = props.faces[i];
+  }
+
   return (<mesh>
         <bufferGeometry attach="geometry">
         <bufferAttribute
           attach="index"
-          count={index.length}
-          array={index}
+          count={faces.length}
+          array={faces}
           itemSize={1} />
         <bufferAttribute
             attach="attributes-position"
-            count={positions.length / 3} array={positions} itemSize={3} />
+            count={vertices.length / 3} array={vertices} itemSize={3} />
         </bufferGeometry>
         <meshBasicMaterial attach="material" color={"#9c88ff"}/>
       </mesh>);
