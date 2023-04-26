@@ -73,7 +73,8 @@ target widgetJsAllDev (pkg : Package) : Array FilePath := do
 
 require proofwidgets from git "https://github.com/EdAyers/ProofWidgets4"@"v0.0.5"
 
-#check proofwidgets
+meta if get_config? env = some "dev" then -- dev is so not everyone has to build it
+  require «doc-gen4» from git "https://github.com/leanprover/doc-gen4" @ "b9421b9"
 
 @[default_target]
 target all (pkg : Package) : Unit := do
