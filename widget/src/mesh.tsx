@@ -280,6 +280,7 @@ function Mesh(props: MeshProps) {
     vertices[i] = props.vertices[i];
   }
 
+
   const faces = new Uint16Array(props.faces.length);
   for (let i = 0; i < props.faces.length; i++) {
     faces[i] = props.faces[i];

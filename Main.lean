@@ -111,7 +111,7 @@ abbrev Faces : Type := Array Nat
 structure MeshProps where
   vertices : Array Float
   faces : Faces
-deriving Server.RpcEncodable
+deriving Server.RpcEncodable, Inhabited
 
 @[widget_module]
 def Mesh : Component MeshProps where
@@ -124,7 +124,6 @@ def randFloat01 [G : RandomGen γ] (gen : γ) : Float × γ := Id.run do do
   let (lo, hi) := G.range gen
   return ((Float.ofNat <| val - lo) / (Float.ofNat <| hi - lo), gen)
 
--- def vertices : Vertices := #[#[0, 0, 0], #[1, 0, 0], #[0, 0, 1]]
 def nvertices : Nat:= 500
 def nfaces : Nat:= 100
 
@@ -138,8 +137,6 @@ def verticesGen [RandomGen γ] (gen : γ): (Array Float) × γ := Id.run do
   return (out, gen)
 
 def vertices : Array Float := (verticesGen mkStdGen).fst
-
-
 
 def facesGen [RandomGen γ] (gen : γ) : (Array Nat) × γ := Id.run do
   let mut out : Array Nat := #[]
@@ -157,6 +154,26 @@ def faces : Array Nat := (facesGen mkStdGen).fst
 
 #html <Mesh vertices={vertices} faces={faces} />
 
+
+-- | Actually do the IO. This incurs an `unsafe`.
+unsafe def unsafePerformIO [Inhabited α] (io: IO α): α :=
+  match unsafeIO io with
+  | Except.ok a    =>  a
+  | Except.error _ => panic! "expected io computation to never fail"
+
+-- | Circumvent the `unsafe` by citing an `implementedBy` instance.
+@[implemented_by unsafePerformIO]
+def performIO [Inhabited α] (io: IO α): α := Inhabited.default
+
+def loadMeshFromFile (filepath : FilePath) : IO MeshProps := do
+  return {vertices := #[], faces := #[]}
+
+def sphere : MeshProps := performIO <| loadMeshFromFile "./resources/sphere.obj"
+#html <Mesh vertices={sphere.vertices} faces={sphere.faces} />
+
+
+def bunny : MeshProps := performIO <| loadMeshFromFile "./resources/bunny.obj"
+#html <Mesh vertices={bunny.vertices} faces={bunny.faces} />
 
 def main : IO Unit :=
   IO.println s!"Hello, {hello}!"
