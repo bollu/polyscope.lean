@@ -1,16 +1,16 @@
 import Lake
 open Lake DSL System
 
-package «renderwidget» {
+package «Polyscope» {
   -- add package configuration options here
 }
 
-lean_lib «Mesh» {
+lean_lib «Polyscope» {
   -- add library configuration options here
 }
 
-lean_exe «renderwidget» {
-  root := `Main
+lean_exe «PolyscopeExamples» {
+  root := `Examples
 }
 
 /- How do I get this from ProofWidgets4? -/
@@ -75,13 +75,16 @@ require proofwidgets from git "https://github.com/EdAyers/ProofWidgets4"@"v0.0.5
 
 #check proofwidgets
 
-
 @[default_target]
 target all (pkg : Package) : Unit := do
-  let some exe := pkg.findLeanExe? ``renderwidget |
-    error "cannot find exe target"
-  let job₁ ← fetch (pkg.target ``widgetJsAll)
-  let _ ← job₁.await
-  let job₂ ← exe.recBuildExe
-  let _ ← job₂.await
+  let some lib := pkg.findLeanLib? ``Polyscope |
+    error "cannot find lib Polyscope"
+  let some exe := pkg.findLeanExe? ``PolyscopeExamples |
+    error "cannot find exe PolyscopeExamples"
+  let job ← fetch (pkg.target ``widgetJsAll)
+  let _ ← job.await
+  let job ← lib.recBuildLean
+  let _ ← job.await
+  let job ← exe.recBuildExe
+  let _ ← job.await
   return .nil
