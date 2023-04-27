@@ -1,6 +1,12 @@
 import ProofWidgets.Component.HtmlDisplay
 open Lean ProofWidgets
 
+
+
+
+
+
+
 /-- A mesh with vertex and face data. -/
 structure MeshProps where
   vertices : Array Float
@@ -10,7 +16,6 @@ deriving Server.RpcEncodable, Inhabited
 @[widget_module]
 def Mesh : Component MeshProps where
   javascript := include_str "../build" / "js" / "mesh.js"
-
 
 /- Random mesh generation -/
 

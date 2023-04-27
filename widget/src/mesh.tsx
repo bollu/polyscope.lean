@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import * as React from 'react';
-import { OrbitControls, useKeyboardControls } from '@react-three/drei';
-import { Canvas } from '@react-three/fiber';
+import { meshBounds, OrbitControls, useKeyboardControls } from '@react-three/drei';
+import { Canvas, ReactThreeFiber, useFrame } from '@react-three/fiber';
+import { AxesHelper } from 'three';
 
 
 interface MeshProps {
@@ -107,7 +108,8 @@ const CameraController = () => {
 export default function (props: any) {
   const me = React.useRef<THREE.Mesh | null>(null)
   const geom = React.useRef<THREE.BufferGeometry | null>(null)
-  const [target, setTarget] = React.useState<THREE.Vector3>(new THREE.Vector3(42, 42, 42));
+  const axes = React.useRef<THREE.AxesHelper | null>(null)
+  const [target, setTarget] = React.useState<THREE.Vector3>(new THREE.Vector3(0.1, 0.1, 0.1));
   const [radius, setRadius] = React.useState<number>(0);
 
   const vertices = new Float32Array(props.vertices.length);
@@ -119,42 +121,47 @@ export default function (props: any) {
   for (let i = 0; i < props.faces.length; i++) {
     faces[i] = props.faces[i];
   }
-
+  
   React.useEffect(() => {
     if (geom.current) {
+      // geom.current = geom.current.center();
       geom.current.computeVertexNormals();
       geom.current.computeBoundingBox();
       geom.current.computeBoundingSphere();
       if (geom.current.boundingSphere) {
-        let delta = new THREE.Vector3(0, 0, geom.current.boundingSphere.radius);
         setRadius(geom.current.boundingSphere?.radius);
-        setTarget(geom.current.boundingSphere?.center.sub(delta));
+        setTarget(geom.current.boundingSphere?.center);
       }
+      axes.current = new THREE.AxesHelper(radius);
+      axes.current.translateX(target.x).translateY(target.y).translateZ(target.z);
     }
-  }, [props.vertices, props.faces])
+  }, [props.vertices, props.faces]);
 
-  return <div style={{ height: 300 }}>
+  return <div style={{ height: 300, fontFamily: "monospace" }}>
+    <div>ver: '0.0.3' </div>
     <div>target: '{JSON.stringify(target)}' </div>
-    <div>Vertices: '{JSON.stringify(props.vertices.length)}' </div>
-    <div>Faces: '{JSON.stringify(props.faces)}' </div>
+    <div>radius: '{JSON.stringify(radius)}' </div>
+    <div>#Vertices: '{JSON.stringify(props.vertices.length)}' </div>
+    <div>#Faces: '{JSON.stringify(props.faces.length)}' </div>
+
     <Canvas>
       <pointLight position={[150, 150, 150]} intensity={0.55} />
       <ambientLight color={0xffffff} />
-      <primitive object={new THREE.AxesHelper(10)} />
-      <mesh ref={me}>
-        <bufferGeometry attach="geometry" ref={geom}>
-          <bufferAttribute
-            attach="index"
-            count={faces.length}
-            array={faces}
-            itemSize={1} />
-          <bufferAttribute
-            attach="attributes-position"
-            count={vertices.length / 3} array={vertices} itemSize={3} />
-        </bufferGeometry>
-        <meshNormalMaterial attach="material" />
-      </mesh>
-      <OrbitControls target={target} minDistance={radius} />
+      <primitive key={axes.current} object={axes} />
+        <mesh ref={me}>
+          <bufferGeometry attach="geometry" ref={geom}>
+            <bufferAttribute
+              attach="index"
+              count={faces.length}
+              array={faces}
+              itemSize={1} />
+            <bufferAttribute
+              attach="attributes-position"
+              count={vertices.length / 3} array={vertices} itemSize={3} />
+          </bufferGeometry>
+          <meshNormalMaterial attach="material" />
+        </mesh>
+      <OrbitControls target={target} minDistance={radius*2} />
     </Canvas>
   </div>
 }
